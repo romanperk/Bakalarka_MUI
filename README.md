@@ -19,6 +19,7 @@ Tento projekt byl vytvořen jako zpracování části bakalářské práce Roman
 
 ## Struktura projektu
 
+```
 src/
 ├── components/ # Komponenty uživatelského rozhraní
 │ ├── Dashboard/ # Komponenty pro dashboard
@@ -30,14 +31,13 @@ src/
 ├── pages/ # Stránky aplikace
 ├── App.js # Hlavní komponenta aplikace
 └── index.js # Vstupní bod aplikace
+```
 
 ## Instalace a spuštění
 
 1. Naklonujte tento repozitář:
    git clone <URL_REPOZITÁŘE>
    cd baka-mui
-
-   ## Instalace a spuštění
 
 2. Nainstalujte závislosti:
    npm install
