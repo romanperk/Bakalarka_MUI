@@ -18,11 +18,13 @@ import {
   ShoppingCart as ShoppingCartIcon,
   FormatListBulleted as ListIcon,
   Menu as MenuIcon,
+  DarkMode as DarkModeIcon,
+  LightMode as LightModeIcon,
 } from "@mui/icons-material";
 import { useBreakpoints } from "../../hooks/useBreakpoints";
 import { cyan } from "@mui/material/colors";
 
-const NavBar = () => {
+const NavBar = ({ darkMode, toggleDarkMode }) => {
   const { downMd } = useBreakpoints();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const location = useLocation();
@@ -65,7 +67,6 @@ const NavBar = () => {
           variant="h6"
           sx={{
             fontWeight: 600,
-            color: "cyan",
           }}
         >
           Navigation
@@ -85,7 +86,7 @@ const NavBar = () => {
             <ListItemText
               primary={item.text}
               slotProps={{
-                primary: { sx: { color: "white" } },
+                primary: { sx: { color: darkMode ? "white" : "black" } },
               }}
             />
           </ListItem>
@@ -95,20 +96,39 @@ const NavBar = () => {
   );
 
   return (
-    <AppBar position="sticky" elevation={2}>
+    <AppBar
+      position="sticky"
+      elevation={2}
+      sx={{
+        backgroundColor: darkMode ? "paper.main" : "white",
+        color: darkMode ? "white" : "black",
+      }}
+    >
       <Toolbar>
         <Typography
           variant="h6"
           sx={{
             flexGrow: 1,
             fontWeight: 600,
-            background: "linear-gradient(45deg, #90caf9 30%, #f48fb1 90%)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
           }}
         >
-          Order Management System
+          Order Management
         </Typography>
+
+        <Box sx={{ display: "flex", alignItems: "center", mr: downMd ? 0 : 2 }}>
+          <IconButton
+            color="inherit"
+            onClick={toggleDarkMode}
+            aria-label="toggle dark mode"
+            sx={{ ml: 1 }}
+          >
+            {darkMode ? (
+              <LightModeIcon sx={{ color: "orange" }} />
+            ) : (
+              <DarkModeIcon sx={{ color: "cyan.400" }} />
+            )}
+          </IconButton>
+        </Box>
 
         {downMd ? (
           <>

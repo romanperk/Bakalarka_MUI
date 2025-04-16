@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo, useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import {
   CssBaseline,
@@ -13,30 +13,20 @@ import NewOrder from "./pages/NewOrder";
 import NavBar from "./components/NavBar/NavBar";
 
 function App() {
-  const theme = React.useMemo(
+  const [darkMode, setDarkMode] = useState(false);
+
+  const handleToggleDarkMode = () => setDarkMode((prev) => !prev);
+
+  const theme = useMemo(
     () =>
       createTheme({
         palette: {
-          mode: "dark",
-          primary: {
-            main: "#90caf9",
-          },
+          mode: darkMode ? "dark" : "light",
           secondary: {
             main: "#f48fb1",
           },
-          background: {
-            default: "#121212",
-            paper: "#1e1e1e",
-          },
         },
         components: {
-          MuiPaper: {
-            styleOverrides: {
-              root: {
-                backgroundImage: "none",
-              },
-            },
-          },
           MuiButton: {
             styleOverrides: {
               root: {
@@ -46,7 +36,7 @@ function App() {
           },
         },
       }),
-    []
+    [darkMode]
   );
 
   return (
@@ -54,7 +44,7 @@ function App() {
       <CssBaseline />
       <OrderProvider>
         <BrowserRouter>
-          <NavBar />
+          <NavBar darkMode={darkMode} toggleDarkMode={handleToggleDarkMode} />
           <Container
             sx={{
               mt: 4,

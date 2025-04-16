@@ -54,6 +54,8 @@ const StatsCharts = ({ orderStats, theme, downMd }) => {
             <PieChart>
               <Pie
                 data={orderStats.paymentMethodDistribution}
+                dataKey={"value"}
+                isAnimationActive={false}
                 outerRadius="60%"
                 innerRadius="30%"
                 labelLine={false}
@@ -88,6 +90,8 @@ const StatsCharts = ({ orderStats, theme, downMd }) => {
             <PieChart>
               <Pie
                 data={orderStats.deliveryMethodDistribution}
+                dataKey={"value"}
+                isAnimationActive={false}
                 outerRadius="60%"
                 innerRadius="30%"
                 labelLine={false}
