@@ -1,17 +1,18 @@
 import React, { useEffect, useState } from "react";
 import NewOrderForm from "../components/NewOrder/Form/NewOrderForm";
-import { Paper, Typography } from "@mui/material";
+import { Box, Button, Paper, Typography } from "@mui/material";
 import { OrderStepper } from "../components/NewOrder/Stepper/Stepper";
 import { useNavigate } from "react-router-dom";
 import { useBreakpoints } from "../hooks/useBreakpoints";
 import { useOrders } from "../context/ordersContext";
+import { ArrowBack as ArrowBackIcon } from "@mui/icons-material";
 
 const NewOrder = () => {
   const navigate = useNavigate();
   const { downMd } = useBreakpoints();
   const { addOrder } = useOrders();
   const [activeStep, setActiveStep] = useState(0);
-  const [formData, setFormData] = useState({
+  const defaultValues = {
     userName: "",
     userEmail: "",
     productName: "",
@@ -19,7 +20,7 @@ const NewOrder = () => {
     paymentMethod: "",
     deliveryMethod: "",
     status: "pending",
-  });
+  };
   const [submitted, setSubmitted] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
 
@@ -33,8 +34,6 @@ const NewOrder = () => {
   const handleNext = () => {
     if (activeStep < steps.length - 1) {
       setActiveStep(activeStep + 1);
-    } else {
-      handleSubmit();
     }
   };
 
@@ -42,10 +41,6 @@ const NewOrder = () => {
     if (activeStep > 0) {
       setActiveStep(activeStep - 1);
     }
-  };
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   useEffect(() => {
@@ -64,11 +59,11 @@ const NewOrder = () => {
     };
   }, [submitted]);
 
-  const handleSubmit = () => {
+  const handleSubmit = (data) => {
     const formattedData = {
-      ...formData,
-      paymentMethod: formData.paymentMethod.toLowerCase().replace(/ /g, "_"),
-      deliveryMethod: formData.deliveryMethod.toLowerCase().replace(/ /g, "_"),
+      ...data,
+      paymentMethod: data.paymentMethod.toLowerCase().replace(/ /g, "_"),
+      deliveryMethod: data.deliveryMethod.toLowerCase().replace(/ /g, "_"),
     };
 
     setLoadingProgress(0);
@@ -80,40 +75,31 @@ const NewOrder = () => {
     }, 2000);
   };
 
-  const canProceed = () => {
-    const isValidEmail = (email) => {
-      const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-      return emailPattern.test(email);
-    };
-
-    switch (activeStep) {
-      case 0:
-        return formData.userName && isValidEmail(formData.userEmail);
-      case 1:
-        return formData.productName && formData.quantity > 0;
-      case 2:
-        return formData.paymentMethod && formData.deliveryMethod;
-      default:
-        return true;
-    }
-  };
-
   return (
     <Paper elevation={3} sx={{ p: 3, borderRadius: 2 }}>
-      <Typography variant="h5" sx={{ mb: 3 }}>
-        New Order
-      </Typography>
+      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 3 }}>
+        <Typography variant="h5">New Order</Typography>
+        {activeStep === 0 && (
+          <Button
+            size="small"
+            onClick={() => navigate("/orders")}
+            variant="contained"
+            startIcon={<ArrowBackIcon />}
+          >
+            {downMd ? "Overview" : "Order Overview"}
+          </Button>
+        )}
+      </Box>
       <OrderStepper activeStep={activeStep} steps={steps} downMd={downMd} />
       <NewOrderForm
         submitted={submitted}
         loadingProgress={loadingProgress}
         activeStep={activeStep}
-        formData={formData}
-        handleChange={handleChange}
+        defaultValues={defaultValues}
         handleBack={handleBack}
         handleNext={handleNext}
-        canProceed={canProceed}
         steps={steps}
+        onSubmit={handleSubmit}
       />
     </Paper>
   );

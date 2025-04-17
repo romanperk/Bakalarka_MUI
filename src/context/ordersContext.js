@@ -36,6 +36,17 @@ const initialOrders = [
     status: "pending",
     createdAt: new Date("2025-03-30T20:10:00"),
   },
+  {
+    id: 4,
+    userName: "Antonio Banderas",
+    userEmail: "antonio.banderas@gmail.com",
+    productName: "Mouse",
+    quantity: 2,
+    paymentMethod: "cash",
+    deliveryMethod: "express",
+    status: "completed",
+    createdAt: new Date("2025-04-01T18:19:00"),
+  },
 ];
 
 export const OrderProvider = ({ children }) => {

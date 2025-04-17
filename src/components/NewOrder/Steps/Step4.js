@@ -1,9 +1,13 @@
 import React from "react";
 import { Box, Typography, Paper, Grid, Alert } from "@mui/material";
+import { useFormContext } from "react-hook-form";
 
-export const Step4 = ({ formData }) => {
+export const Step4 = () => {
+  const { getValues } = useFormContext();
+  const formData = getValues();
+
   return (
-    <Box sx={{ minHeight: 300 }}>
+    <Box sx={{ minHeight: 250 }}>
       <Typography variant="h6" color="primary" gutterBottom>
         Order Summary
       </Typography>

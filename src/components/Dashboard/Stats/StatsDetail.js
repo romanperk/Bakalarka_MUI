@@ -7,25 +7,7 @@ import {
   LinearProgress,
   Stack,
 } from "@mui/material";
-
-const styles = {
-  card: {
-    borderRadius: 2,
-    position: "relative",
-  },
-  indicator: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    width: "100%",
-    height: "4px",
-  },
-  progressBar: {
-    flex: 1,
-    height: 6,
-    borderRadius: 3,
-  },
-};
+import { useNavigate } from "react-router-dom";
 
 export const StatsDetail = ({
   icon,
@@ -35,8 +17,35 @@ export const StatsDetail = ({
   progress,
   percentage,
 }) => {
+  const navigate = useNavigate();
+  const isClickable = title === "Total Orders";
+
+  const styles = {
+    card: {
+      borderRadius: 2,
+      position: "relative",
+      cursor: isClickable && "pointer",
+    },
+    indicator: {
+      position: "absolute",
+      top: 0,
+      left: 0,
+      width: "100%",
+      height: "4px",
+    },
+    progressBar: {
+      flex: 1,
+      height: 6,
+      borderRadius: 3,
+    },
+  };
+
   return (
-    <Card elevation={2} sx={styles.card}>
+    <Card
+      elevation={2}
+      sx={styles.card}
+      onClick={isClickable ? () => navigate("/orders") : null}
+    >
       <Box sx={{ ...styles.indicator, bgcolor: color }} />
       <CardContent>
         <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>

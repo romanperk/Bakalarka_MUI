@@ -8,44 +8,50 @@ import {
   Select,
   MenuItem,
 } from "@mui/material";
+import { useFormContext, Controller } from "react-hook-form";
 
-export const Step2 = ({ formData, handleChange }) => {
+export const Step2 = () => {
+  const { control } = useFormContext();
   return (
     <Box sx={{ minHeight: 300 }}>
       <Stack direction={"column"} spacing={2}>
         <FormControl fullWidth required>
           <InputLabel>Product</InputLabel>
-          <Select
+          <Controller
             name="productName"
-            value={formData.productName}
-            onChange={handleChange}
-            label="Product"
-          >
-            <MenuItem value="Headphones">Headphones</MenuItem>
-            <MenuItem value="Keyboard">Keyboard</MenuItem>
-            <MenuItem value="Smart Watch">Smart Watch</MenuItem>
-            <MenuItem value="Speaker">Speaker</MenuItem>
-            <MenuItem value="Mouse">Mouse</MenuItem>
-          </Select>
+            control={control}
+            rules={{ required: "Product is required" }}
+            render={({ field, fieldState }) => (
+              <Select {...field} label="Product" error={!!fieldState.error}>
+                <MenuItem value="Headphones">Headphones</MenuItem>
+                <MenuItem value="Keyboard">Keyboard</MenuItem>
+                <MenuItem value="Smart Watch">Smart Watch</MenuItem>
+                <MenuItem value="Speaker">Speaker</MenuItem>
+                <MenuItem value="Mouse">Mouse</MenuItem>
+              </Select>
+            )}
+          />
         </FormControl>
-        <TextField
-          label="Quantity"
+        <Controller
           name="quantity"
-          type="number"
-          slotProps={{
-            htmlInput: {
-              min: 1,
-              onKeyDown: (e) => {
-                if (e.key === "." || e.key === "-") {
-                  e.preventDefault();
-                }
-              },
-            },
+          control={control}
+          rules={{
+            required: "Quantity is required",
+            min: { value: 1, message: "Minimum quantity is 1" },
+            validate: (value) =>
+              Number.isInteger(Number(value)) || "Must be an integer",
           }}
-          value={formData.quantity}
-          onChange={handleChange}
-          fullWidth
-          required
+          render={({ field, fieldState }) => (
+            <TextField
+              label="Quantity"
+              type="number"
+              fullWidth
+              required
+              {...field}
+              error={!!fieldState.error}
+              helperText={fieldState.error?.message}
+            />
+          )}
         />
       </Stack>
     </Box>

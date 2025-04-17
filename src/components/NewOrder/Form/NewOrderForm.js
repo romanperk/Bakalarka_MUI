@@ -1,4 +1,5 @@
 import React from "react";
+import { useForm, FormProvider } from "react-hook-form";
 import { Step1 } from "../Steps/Step1";
 import { Step2 } from "../Steps/Step2";
 import { Step3 } from "../Steps/Step3";
@@ -10,42 +11,48 @@ const NewOrderForm = ({
   submitted,
   loadingProgress,
   activeStep,
-  formData,
-  handleChange,
   handleBack,
   handleNext,
-  canProceed,
   steps,
+  onSubmit,
+  defaultValues,
 }) => {
+  const methods = useForm({ defaultValues, mode: "onChange" });
+  const isLastStep = activeStep === steps.length - 1;
+
+  const handleFormSubmit = (e) => {
+    if (isLastStep) {
+      methods.handleSubmit(onSubmit)(e);
+    } else {
+      e.preventDefault();
+      handleNext();
+    }
+  };
+
   return (
-    <>
-      {submitted ? (
-        <SubmittedStep
-          submitted={submitted}
-          loadingProgress={loadingProgress}
-        />
-      ) : (
-        <>
-          {activeStep === 0 && (
-            <Step1 formData={formData} handleChange={handleChange} />
-          )}
-          {activeStep === 1 && (
-            <Step2 formData={formData} handleChange={handleChange} />
-          )}
-          {activeStep === 2 && (
-            <Step3 formData={formData} handleChange={handleChange} />
-          )}
-          {activeStep === 3 && <Step4 formData={formData} />}
-          <FormNavigation
-            handleBack={handleBack}
-            activeStep={activeStep}
-            handleNext={handleNext}
-            canProceed={canProceed}
-            steps={steps}
+    <FormProvider {...methods}>
+      <form onSubmit={handleFormSubmit}>
+        {submitted ? (
+          <SubmittedStep
+            submitted={submitted}
+            loadingProgress={loadingProgress}
           />
-        </>
-      )}
-    </>
+        ) : (
+          <>
+            {activeStep === 0 && <Step1 />}
+            {activeStep === 1 && <Step2 />}
+            {activeStep === 2 && <Step3 />}
+            {activeStep === 3 && <Step4 />}
+            <FormNavigation
+              handleBack={handleBack}
+              activeStep={activeStep}
+              handleNext={handleNext}
+              steps={steps}
+            />
+          </>
+        )}
+      </form>
+    </FormProvider>
   );
 };
 

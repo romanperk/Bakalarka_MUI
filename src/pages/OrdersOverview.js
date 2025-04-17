@@ -6,9 +6,11 @@ import { useNavigate } from "react-router-dom";
 import { OrdersTable } from "../components/OrdersOverview/OrdersTable";
 import { EditOrderModal } from "../components/OrdersOverview/Modals/EditOrderModal";
 import { ConfirmDeleteDialog } from "../components/OrdersOverview/Modals/ConfirmDeleteDialog";
+import { useBreakpoints } from "../hooks/useBreakpoints";
 
 const OrdersOverview = () => {
   const navigate = useNavigate();
+  const { downMd } = useBreakpoints();
   const { orders, editOrder, completeOrder, deleteOrder } = useOrders();
   const [editingOrder, setEditingOrder] = useState(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -81,11 +83,12 @@ const OrdersOverview = () => {
       <Box sx={{ display: "flex", justifyContent: "space-between", mb: 3 }}>
         <Typography variant="h5">Orders</Typography>
         <Button
+          size="small"
           onClick={() => navigate("/new-order")}
           variant="contained"
           startIcon={<AddIcon />}
         >
-          Add New Order
+          {downMd ? "Order" : "Add New Order"}
         </Button>
       </Box>
       <OrdersTable

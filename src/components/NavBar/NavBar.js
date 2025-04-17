@@ -10,19 +10,21 @@ import {
   ListItemIcon,
   ListItemText,
   Divider,
+  Tooltip,
+  alpha,
 } from "@mui/material";
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
-  Dashboard as DashboardIcon,
-  ShoppingCart as ShoppingCartIcon,
+  DashboardOutlined as DashboardIcon,
+  ShoppingCartOutlined as ShoppingCartIcon,
   FormatListBulleted as ListIcon,
   Menu as MenuIcon,
-  DarkMode as DarkModeIcon,
-  LightMode as LightModeIcon,
+  DarkModeOutlined as DarkModeIcon,
+  LightModeOutlined as LightModeIcon,
 } from "@mui/icons-material";
 import { useBreakpoints } from "../../hooks/useBreakpoints";
-import { cyan } from "@mui/material/colors";
+import { blue } from "@mui/material/colors";
 
 const NavBar = ({ darkMode, toggleDarkMode }) => {
   const { downMd } = useBreakpoints();
@@ -45,15 +47,13 @@ const NavBar = ({ darkMode, toggleDarkMode }) => {
     setDrawerOpen(open);
   };
 
-  const getActiveStyle = (path) => {
-    return location.pathname === path
+  const getActiveStyle = (path) =>
+    location.pathname === path
       ? {
-          opacity: 1,
-          borderBottom: `2px solid ${cyan[500]}`,
-          paddingBottom: "3px",
+          background: alpha(darkMode ? blue[800] : blue[100], 0.3),
+          fontWeight: 600,
         }
       : {};
-  };
 
   const drawerItems = (
     <Box
@@ -73,14 +73,17 @@ const NavBar = ({ darkMode, toggleDarkMode }) => {
         </Typography>
       </Box>
       <Divider />
-      <List>
+      <List sx={{ p: 1 }}>
         {navItems.map((item) => (
           <ListItem
-            button
             component={Link}
             to={item.path}
             key={item.text}
             selected={location.pathname === item.path}
+            sx={{
+              borderRadius: 2,
+              ...getActiveStyle(item.path),
+            }}
           >
             <ListItemIcon>{item.icon}</ListItemIcon>
             <ListItemText
@@ -115,20 +118,18 @@ const NavBar = ({ darkMode, toggleDarkMode }) => {
           Order Management
         </Typography>
 
-        <Box sx={{ display: "flex", alignItems: "center", mr: downMd ? 0 : 2 }}>
+        <Tooltip
+          title={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+        >
           <IconButton
             color="inherit"
             onClick={toggleDarkMode}
             aria-label="toggle dark mode"
-            sx={{ ml: 1 }}
+            sx={{ mr: 2 }}
           >
-            {darkMode ? (
-              <LightModeIcon sx={{ color: "orange" }} />
-            ) : (
-              <DarkModeIcon sx={{ color: "cyan.400" }} />
-            )}
+            {darkMode ? <LightModeIcon /> : <DarkModeIcon />}
           </IconButton>
-        </Box>
+        </Tooltip>
 
         {downMd ? (
           <>
@@ -153,7 +154,7 @@ const NavBar = ({ darkMode, toggleDarkMode }) => {
           <Box
             sx={{
               display: "flex",
-              gap: 3,
+              gap: 2,
               alignItems: "center",
             }}
           >
@@ -166,12 +167,22 @@ const NavBar = ({ darkMode, toggleDarkMode }) => {
                   textDecoration: "none",
                   display: "flex",
                   alignItems: "center",
-                  gap: 1,
-                  opacity: 0.9,
+                  fontSize: 14,
+                  padding: "6px 12px",
+                  borderRadius: 8,
                   ...getActiveStyle(item.path),
                 }}
               >
-                {item.icon} {item.text}
+                <span
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    marginRight: 6,
+                  }}
+                >
+                  {item.icon}
+                </span>
+                {item.text}
               </Link>
             ))}
           </Box>
