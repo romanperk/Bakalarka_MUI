@@ -86,7 +86,7 @@ const NewOrder = () => {
             variant="contained"
             startIcon={<ArrowBackIcon />}
           >
-            {downMd ? "Overview" : "Order Overview"}
+            {downMd ? "Overview" : "Orders Overview"}
           </Button>
         )}
       </Box>
