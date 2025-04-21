@@ -14,6 +14,7 @@ import {
   TextField,
   MenuItem,
   Grid,
+  TablePagination,
 } from "@mui/material";
 import {
   Edit as EditIcon,
@@ -23,38 +24,16 @@ import {
 } from "@mui/icons-material";
 
 const headCells = [
-  { id: "id", label: "ID" },
-  { id: "userName", label: "Customer", disableSort: true },
-  { id: "productName", label: "Product", disableSort: true },
-  { id: "quantity", label: "Quantity" },
-  { id: "paymentMethod", label: "Payment", disableSort: true },
-  { id: "deliveryMethod", label: "Delivery", disableSort: true },
-  { id: "status", label: "Status", disableSort: true },
-  { id: "createdAt", label: "Created" },
-  { id: "actions", label: "Actions", disableSort: true },
+  { id: "id", label: "ID", sortable: true },
+  { id: "userName", label: "Customer" },
+  { id: "productName", label: "Product" },
+  { id: "quantity", label: "Quantity", sortable: true },
+  { id: "paymentMethod", label: "Payment" },
+  { id: "deliveryMethod", label: "Delivery" },
+  { id: "status", label: "Status" },
+  { id: "createdAt", label: "Created", sortable: true },
+  { id: "actions", label: "Actions" },
 ];
-
-function descendingComparator(a, b, orderBy) {
-  if (b[orderBy] < a[orderBy]) return -1;
-  if (b[orderBy] > a[orderBy]) return 1;
-  return 0;
-}
-
-function getComparator(order, orderBy) {
-  return order === "desc"
-    ? (a, b) => descendingComparator(a, b, orderBy)
-    : (a, b) => -descendingComparator(a, b, orderBy);
-}
-
-function stableSort(array, comparator) {
-  const stabilized = array.map((el, idx) => [el, idx]);
-  stabilized.sort((a, b) => {
-    const cmp = comparator(a[0], b[0]);
-    if (cmp !== 0) return cmp;
-    return a[1] - b[1];
-  });
-  return stabilized.map((el) => el[0]);
-}
 
 export const OrdersTable = ({
   orders,
@@ -68,48 +47,54 @@ export const OrdersTable = ({
   const [orderBy, setOrderBy] = useState("id");
   const [filterText, setFilterText] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const statusOptions = useMemo(
-    () => Array.from(new Set(orders.map((o) => o.status))),
+    () => [...new Set(orders.map((o) => o.status))],
     [orders]
   );
 
   const handleRequestSort = (property) => {
     const isAsc = orderBy === property && order === "asc";
-    const isDesc = orderBy === property && order === "desc";
-
-    if (isDesc) {
-      setOrder(null);
-      setOrderBy(null);
-    } else if (isAsc) {
-      setOrder("desc");
-      setOrderBy(property);
-    } else {
-      setOrder("asc");
-      setOrderBy(property);
-    }
+    setOrder(isAsc ? "desc" : "asc");
+    setOrderBy(property);
   };
 
   const filteredOrders = useMemo(() => {
-    let filtered = orders;
-    if (filterText) {
-      const searchText = filterText.toLowerCase();
-      filtered = filtered.filter(
-        (order) =>
-          order.userName.toLowerCase().includes(searchText) ||
-          order.productName.toLowerCase().includes(searchText) ||
-          order.userEmail.toLowerCase().includes(searchText) ||
-          String(order.id).includes(searchText)
-      );
-    }
+    let result = filterText
+      ? orders.filter(
+          (order) =>
+            order.userName.toLowerCase().includes(filterText.toLowerCase()) ||
+            order.productName
+              .toLowerCase()
+              .includes(filterText.toLowerCase()) ||
+            order.userEmail.toLowerCase().includes(filterText.toLowerCase()) ||
+            String(order.id).includes(filterText)
+        )
+      : orders;
     if (statusFilter) {
-      filtered = filtered.filter((order) => order.status === statusFilter);
+      result = result.filter((order) => order.status === statusFilter);
+    }
+    if (order && orderBy) {
+      result = [...result].sort((a, b) => {
+        const comparison =
+          a[orderBy] < b[orderBy] ? -1 : a[orderBy] > b[orderBy] ? 1 : 0;
+        return order === "asc" ? comparison : -comparison;
+      });
     }
 
-    return order && orderBy
-      ? stableSort(filtered, getComparator(order, orderBy))
-      : filtered;
+    return result;
   }, [orders, filterText, statusFilter, order, orderBy]);
+
+  const paginatedOrders = useMemo(
+    () =>
+      filteredOrders.slice(
+        page * rowsPerPage,
+        page * rowsPerPage + rowsPerPage
+      ),
+    [filteredOrders, page, rowsPerPage]
+  );
 
   const showEmptyState = filteredOrders.length === 0;
   const isFiltered = filterText || statusFilter;
@@ -120,19 +105,17 @@ export const OrdersTable = ({
         <Grid container spacing={2}>
           <Grid size={{ xs: 12, sm: 9 }}>
             <Box sx={{ display: "flex", alignItems: "center" }}>
-              <SearchIcon
-                sx={{ color: "text.secondary", fontSize: 20, mr: 1 }}
-              />
+              <SearchIcon sx={{ color: "text.secondary", mr: 1 }} />
               <TextField
                 placeholder="Search orders"
                 variant="outlined"
                 size="small"
                 value={filterText}
-                onChange={(e) => setFilterText(e.target.value)}
-                sx={{ width: "100%" }}
-                InputProps={{
-                  sx: { pl: 0 },
+                onChange={(e) => {
+                  setFilterText(e.target.value);
+                  setPage(0);
                 }}
+                fullWidth
               />
             </Box>
           </Grid>
@@ -144,7 +127,10 @@ export const OrdersTable = ({
               select
               fullWidth
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
+              onChange={(e) => {
+                setStatusFilter(e.target.value);
+                setPage(0);
+              }}
             >
               <MenuItem value="">All Statuses</MenuItem>
               {statusOptions.map((status) => (
@@ -163,12 +149,9 @@ export const OrdersTable = ({
               {headCells.map((headCell) => (
                 <TableCell
                   key={headCell.id}
-                  sortDirection={orderBy === headCell.id ? order : false}
                   align={headCell.id === "actions" ? "center" : "left"}
                 >
-                  {headCell.disableSort ? (
-                    headCell.label
-                  ) : (
+                  {headCell.sortable ? (
                     <TableSortLabel
                       active={orderBy === headCell.id}
                       direction={orderBy === headCell.id ? order : "asc"}
@@ -176,6 +159,8 @@ export const OrdersTable = ({
                     >
                       {headCell.label}
                     </TableSortLabel>
+                  ) : (
+                    headCell.label
                   )}
                 </TableCell>
               ))}
@@ -206,7 +191,7 @@ export const OrdersTable = ({
                 </TableCell>
               </TableRow>
             ) : (
-              filteredOrders.map((order) => (
+              paginatedOrders.map((order) => (
                 <TableRow key={order.id}>
                   <TableCell>{order.id}</TableCell>
                   <TableCell>
@@ -229,9 +214,7 @@ export const OrdersTable = ({
                   </TableCell>
                   <TableCell>{formatDate(order.createdAt)}</TableCell>
                   <TableCell align="center">
-                    <Box
-                      sx={{ display: "flex", gap: 1, justifyContent: "center" }}
-                    >
+                    <Box sx={{ display: "flex", gap: 1 }}>
                       <IconButton
                         size="small"
                         color="primary"
@@ -266,6 +249,20 @@ export const OrdersTable = ({
           </TableBody>
         </Table>
       </TableContainer>
+      {!showEmptyState && (
+        <TablePagination
+          rowsPerPageOptions={[5, 10, 25]}
+          component="div"
+          count={filteredOrders.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={(_, newPage) => setPage(newPage)}
+          onRowsPerPageChange={(e) => {
+            setRowsPerPage(parseInt(e.target.value, 10));
+            setPage(0);
+          }}
+        />
+      )}
     </Paper>
   );
 };
